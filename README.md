@@ -19,7 +19,6 @@ Ita.exe <image_path> <scale_factor>
 
 ### Linux / macOS
 ```bash
-else
 ./Ita <image_path> <scale_factor>
 ```
 
