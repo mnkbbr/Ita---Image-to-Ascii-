@@ -27,3 +27,6 @@ Ita.exe <image_path> <scale_factor>
 Recommended scale:
 - 6-10 : for small console windows
 - 3-5  : for large images / fullscreen
+<p align="center">
+  <img src="https://github.com/mnkbbr/Ita---Image-to-Ascii-/blob/media/BadApple.png" width="500" alt="ASCII Art">
+</p>p
