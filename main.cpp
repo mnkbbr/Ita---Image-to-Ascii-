@@ -1,14 +1,21 @@
+#define STBI_MAX_DIMENSIONS 1<<30
+
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_FAILURE_USERMSG
-#define STBI_NO_GIF
 #define USEPALLETE
 
-// #define DEBUG
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "stb_image.h"
 #include <iostream>
 #include <string>
 #include <cctype>
+#include <fstream>
+
 
 int GetNum(char * str){
     int finalvalue = 0;
@@ -20,13 +27,13 @@ int GetNum(char * str){
     return finalvalue;
 }
 
-float GetMeanValue(const unsigned char* data, int width, int i, int j, int desired_size) {
+float GetMeanValue(const unsigned char* data, int width, int height, int i, int j, int f, int desired_size) {
     int totalvalue = 0;
-    
-    int start_x = i * desired_size;
-    int start_y = j * (desired_size * 2);
-
     int desired_size_y = desired_size * 2;
+    int frame = f * (width * height);
+
+    int start_x =  i * desired_size;
+    int start_y =  j * desired_size_y;
 
     for (int y = 0; y < desired_size_y; y++) {
         for (int x = 0; x < desired_size; x++) {
@@ -34,7 +41,9 @@ float GetMeanValue(const unsigned char* data, int width, int i, int j, int desir
             int pixel_x = start_x + x;
             int pixel_y = start_y + y;
 
-            int pixel_index = pixel_y * width + pixel_x;
+            if (pixel_x >= width || pixel_y >= height) continue;
+
+            int pixel_index = frame + (pixel_y * width + pixel_x);
 
             totalvalue += (int)data[pixel_index];
         }
@@ -63,25 +72,55 @@ int main(int argc, char ** argv){
 
     std::string palette = " .:-=+*#%@";
     int width, height, chanels;
-    unsigned char * data;
+    unsigned char * data = nullptr;
     int desired_size;
 
-    switch (argc)
-    {
-    case 2:
-        data = stbi_load( argv[1], &width, &height, &chanels, 1 );
-        desired_size = 6;
-        break;
+    bool is_gif = false;
 
-    case 3:
-        data = stbi_load( argv[1], &width, &height, &chanels, 1 );
-        desired_size = GetNum(argv[2]);
-        break;
+    int number_of_frames = 1;
+    int * delays = nullptr;
 
-    default:
+
+    if (argc<2 || argc>3){
         HelpMenu();
         return 0;
     }
+
+            std::ifstream file(argv[1], std::ios::binary);
+            if (file.is_open()){
+
+                int filelen;
+                file.seekg(0, std::ios::end);
+                filelen = file.tellg();
+                file.seekg(0, std::ios::beg);
+                
+                unsigned char * rawdata = new unsigned char [filelen];
+
+                file.read((char*)rawdata, filelen);
+                file.close();
+
+                if (filelen > 6 && rawdata[0] =='G' && rawdata[1] == 'I' && rawdata[2] == 'F')
+                {
+                    data = stbi_load_gif_from_memory(rawdata, filelen, &delays, &width, &height, &number_of_frames, &chanels, 1);
+                    is_gif = true;
+                }
+                else {
+                    data = stbi_load( argv[1], &width, &height, &chanels, 1 );
+                }
+
+                desired_size = 6;
+                delete [] rawdata;
+
+            }
+            else{
+                std::cerr<<"Error: Could not open or decode the image "<<argv[1]<<std::endl;
+                return -1;
+            }
+
+    if (argc == 3){
+        desired_size = GetNum(argv[2]);
+    }
+        
     if (!data)
     {
         std::cerr << "Error: Could not open or decode the image '" << argv[1] << "'" << std::endl;
@@ -90,27 +129,51 @@ int main(int argc, char ** argv){
         return -1;   
     }
    
-    system("cls");
     int new_width = width / desired_size;
     int new_height = height / (desired_size * 2);
 
-for (size_t j = 0; j < new_height; j++)
+for (size_t f = 0; f < number_of_frames; f++)
 {
-    for (size_t i = 0; i < new_width; i++)
+    if (is_gif)
     {
-        #ifdef USEPALLETE
-        std::cout<<palette[(int)((GetMeanValue(data, width, i, j, desired_size) / 255)*9)];
+        #ifdef _WIN32
+        system("cls");
         #else
-        if(GetMeanValue(data, width, i, j, desired_size) <= 128){
-            std::cout<<"@";
-        }
-        else std::cout<<" ";
+        system("clear");
         #endif
+    }
+
+       for (size_t j = 0; j < new_height; j++){
+        for (size_t i = 0; i < new_width; i++){
+
+            #ifdef USEPALLETE
+            std::cout<<palette[(int)((GetMeanValue(data, width, height, i, j, f, desired_size) / 255)*9)];
+            #else
+            if (GetMeanValue(data, width, height, i, j, f, desired_size) <= 128){
+                std::cout<<"@";
+            }
+            else std::cout<<" ";
+            #endif
     }
     std::cout<<std::endl;
 }
 
+if (is_gif)
+{
+    #ifdef _WIN32
+        Sleep(delays[f]);
+    #else
+        usleep(delays[f]*1000);
+    #endif
+}
+}
     stbi_image_free(data);
-    return 0;
 
+    if (is_gif && delays)
+    {
+        stbi_image_free(delays);
+
+    }
+    
+    return 0;
 }
