@@ -5,6 +5,8 @@ It supports any color image, but yields better results with black and white inpu
 
 ## Fast Start:
 
+_On Windows, you need [MSYS2](https://www.msys2.org/) to build the program, or you can use any alternative method of your choice_
+
 ### 1. Compilation
 
 ```
