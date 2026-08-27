@@ -10,7 +10,12 @@ _On Windows, you need [MSYS2](https://www.msys2.org/) to build the program, or y
 ### 1. Compilation
 
 ```
-g++ main.cpp -o Ita
+mkdir build
+cd build
+```
+```
+cmake ..
+cmake --build .
 ```
 ### 2. Execution 
 
