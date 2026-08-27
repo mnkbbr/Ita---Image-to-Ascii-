@@ -105,7 +105,7 @@ int main(int argc, char ** argv){
                     is_gif = true;
                 }
                 else {
-                    data = stbi_load( argv[1], &width, &height, &chanels, 1 );
+                    data = stbi_load_from_memory(rawdata, filelen, &width, &height, &chanels, 1 );
                 }
 
                 desired_size = 6;
