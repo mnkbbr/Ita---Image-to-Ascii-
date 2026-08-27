@@ -85,6 +85,7 @@ int main(int argc, char ** argv){
         HelpMenu();
         return 0;
     }
+    
             std::ifstream file(argv[1], std::ios::binary);
             if (file.is_open()){
 
