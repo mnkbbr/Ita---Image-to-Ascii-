@@ -7,5 +7,5 @@ int GetNum(char * str){
             finalvalue = (finalvalue * 10) + (str[i] - '0');
         }
     }
-    return finalvalue;
+    return (finalvalue <= 0) ? 1 : finalvalue;
 }

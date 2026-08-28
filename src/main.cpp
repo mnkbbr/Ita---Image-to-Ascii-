@@ -63,7 +63,6 @@ int main(int argc, char ** argv){
                     data = stbi_load_from_memory(rawdata, filelen, &width, &height, &chanels, 1 );
                 }
 
-                desired_size = 6;
                 delete [] rawdata;
 
             }
@@ -73,9 +72,7 @@ int main(int argc, char ** argv){
             }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 
-    if (argc == 3){
-        desired_size = GetNum(argv[2]);
-    }
+
         
     if (!data)
     {
@@ -83,6 +80,12 @@ int main(int argc, char ** argv){
         std::cerr << "Supported formats: JPG, PNG, BMP, TGA, GIF, PSD, HDR" << std::endl;
         std::cerr << "Reason: " << stbi_failure_reason() << std::endl;
         return -1;   
+    }
+
+    desired_size = (width / 120) < 1 ?  1 : (width / 120);
+
+    if (argc == 3){
+        desired_size = GetNum(argv[2]);
     }
    
     int new_width = width / desired_size;
