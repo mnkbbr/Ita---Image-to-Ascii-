@@ -67,12 +67,11 @@ int main(int argc, char ** argv){
 
             }
             else{
-                std::cerr<<"Error: Could not open or decode the image "<<argv[1]<<std::endl;
+                std::cerr<<"Error: the file("<<argv[1]<<") is corrupted or cannot be opened.  "<<std::endl;
+                std::cerr<<"Check the name and access permissions."<<std::endl;
                 return -1;
             }
 //-------------------------------------------------------------------------------------------------------------------------------------------
-
-
         
     if (!data)
     {

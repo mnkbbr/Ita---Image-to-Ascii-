@@ -1,6 +1,6 @@
 # Image to ASCII Converter (Ita)
 
-Converts images and animated GIFs to ASCII art using the <stb_image> library.
+Converts images and animated GIFs to ASCII art using the <[stb_image](https://github.com/nothings/stb/blob/master/stb_image.h)> library.
 It supports any color image and GIFs, but yields better results with black and white inputs
 
 ## Fast Start:
