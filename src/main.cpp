@@ -2,7 +2,6 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_FAILURE_USERMSG
-#define USEPALLETE
 
 #ifdef _WIN32
 #include <windows.h>
@@ -14,7 +13,6 @@
 #include <iostream>
 #include <string>
 #include <fstream>
-#include <vector>
 
 #include "utils.h"
 
@@ -39,7 +37,6 @@ int main(int argc, char ** argv){
     }
 //                                                          Image writing
 //-------------------------------------------------------------------------------------------------------------------------------------------
-
             std::ifstream file(argv[1], std::ios::binary);
             if (file.is_open()){
 
@@ -58,12 +55,9 @@ int main(int argc, char ** argv){
                     data = stbi_load_gif_from_memory(rawdata, filelen, &delays, &width, &height, &number_of_frames, &chanels, 1);
                     is_gif = true;
                 }
-                else {
-                    data = stbi_load_from_memory(rawdata, filelen, &width, &height, &chanels, 1 );
-                }
+                else data = stbi_load_from_memory(rawdata, filelen, &width, &height, &chanels, 1 );
 
                 delete [] rawdata;
-
             }
             else{
                 std::cerr<<"Error: the file("<<argv[1]<<") is corrupted or cannot be opened.  "<<std::endl;
@@ -88,9 +82,25 @@ int main(int argc, char ** argv){
    
     int new_width = width / desired_size;
     int new_height = height / (desired_size * 2);
+    //                                                          Transfer to buffer
+//-------------------------------------------------------------------------------------------------------------------------------------------
+    char ** frame_buffer = new char * [number_of_frames];
+    for (size_t f = 0; f < number_of_frames; f++)
+    {
+        frame_buffer[f] = new char [new_width * new_height + new_height + 1];
 
-    char * buffer = new char [new_width * new_height + new_height + 1];
-//                                                          Frame drawing
+        for (size_t j = 0; j < new_height; j++){
+            for (size_t i = 0; i < new_width; i++){
+
+                frame_buffer[f][(j * new_width) + i] = palette[(int)((GetMeanValue(data, width, height, i, j, f, desired_size) / 255)*palettesize)];
+            }
+            frame_buffer[f][j *new_width] = '\n';
+        }
+        frame_buffer[f][new_height * new_width + 1] = '\0';
+    }
+//-------------------------------------------------------------------------------------------------------------------------------------------
+
+    //                                                          Frame drawing
 //-------------------------------------------------------------------------------------------------------------------------------------------
     for (size_t f = 0; f < number_of_frames; f++)
     {
@@ -102,24 +112,17 @@ int main(int argc, char ** argv){
             system("clear");
             #endif
         }
-        for (size_t j = 0; j < new_height; j++){
-            for (size_t i = 0; i < new_width; i++){
 
-                buffer[(j * new_width) + i] = palette[(int)((GetMeanValue(data, width, height, i, j, f, desired_size) / 255)*palettesize)];
-            }
-            buffer[j *new_width] = '\n';
-    }
+        std::cout<<frame_buffer[f]<<'\n';
 
-    buffer[new_height * new_width + 1] = '\0';
-    std::cout<<buffer<<'\n';
-    if (is_gif)
-    {
-        #ifdef _WIN32
-            Sleep(delays[f]);
-        #else
-            usleep(delays[f]*1000);
-        #endif
-    }
+        if (is_gif)
+        {
+            #ifdef _WIN32
+                Sleep(delays[f]);
+            #else
+                usleep(delays[f]*1000);
+            #endif
+        }
     }
 //-------------------------------------------------------------------------------------------------------------------------------------------
 
