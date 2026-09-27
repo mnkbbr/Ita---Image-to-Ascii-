@@ -14,10 +14,9 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <vector>
 
 #include "utils.h"
-
-
 
 
 int main(int argc, char ** argv){
@@ -90,6 +89,7 @@ int main(int argc, char ** argv){
     int new_width = width / desired_size;
     int new_height = height / (desired_size * 2);
 
+    char * buffer = new char [new_width * new_height + new_height + 1];
 //                                                          Frame drawing
 //-------------------------------------------------------------------------------------------------------------------------------------------
     for (size_t f = 0; f < number_of_frames; f++)
@@ -105,17 +105,13 @@ int main(int argc, char ** argv){
         for (size_t j = 0; j < new_height; j++){
             for (size_t i = 0; i < new_width; i++){
 
-                #ifdef USEPALLETE
-                std::cout<<palette[(int)((GetMeanValue(data, width, height, i, j, f, desired_size) / 255)*palettesize)];
-                #else
-                if (GetMeanValue(data, width, height, i, j, f, desired_size) <= 128){
-                    std::cout<<"@";
-                }
-                else std::cout<<" ";
-                #endif
-        }
-        std::cout<<std::endl;
+                buffer[(j * new_width) + i] = palette[(int)((GetMeanValue(data, width, height, i, j, f, desired_size) / 255)*palettesize)];
+            }
+            buffer[j *new_width] = '\n';
     }
+
+    buffer[new_height * new_width + 1] = '\0';
+    std::cout<<buffer<<'\n';
     if (is_gif)
     {
         #ifdef _WIN32
