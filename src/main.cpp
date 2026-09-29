@@ -20,7 +20,7 @@
 int main(int argc, char ** argv){
 
     std::string palette = " .:-=+*#%@";
-    int palettesize = palette.size() - 1;
+    int palettesize = palette.size();
     int width, height, chanels;
     unsigned char * data = nullptr;
     int desired_size;
@@ -31,7 +31,7 @@ int main(int argc, char ** argv){
     int * delays = nullptr;
 
 
-    if (argc<2 || argc>3){
+    if (argc<2 || argc>5){
         HelpMenu();
         return 0;
     }
@@ -76,10 +76,11 @@ int main(int argc, char ** argv){
 
     desired_size = (width / 120) < 1 ?  1 : (width / 120);
 
-    if (argc == 3){
-        desired_size = GetNum(argv[2]);
+    if (argc > 2){
+        if(!CheckFlags(desired_size, palette, argv)) return 0;
+        palettesize = palette.size();
     }
-   
+    
     int new_width = width / desired_size;
     int new_height = height / (desired_size * 2);
     //                                                          Transfer to buffer
@@ -89,12 +90,12 @@ int main(int argc, char ** argv){
     {
         frame_buffer[f] = new char [new_width * new_height + new_height + 1];
 
-        for (size_t j = 0; j < new_height; j++){
-            for (size_t i = 0; i < new_width; i++){
+        for (size_t h = 0; h < new_height; h++){
+            for (size_t w = 0; w < new_width; w++){
 
-                frame_buffer[f][(j * new_width) + i] = palette[(int)((GetMeanValue(data, width, height, i, j, f, desired_size) / 255)*palettesize)];
+                frame_buffer[f][(h * new_width) + w] = palette[(int)((GetMeanValue(data, width, height, w, h, f, desired_size)*palettesize)/ 255)];
             }
-            frame_buffer[f][j *new_width] = '\n';
+            frame_buffer[f][h *new_width] = '\n';
         }
         frame_buffer[f][new_height * new_width + 1] = '\0';
     }

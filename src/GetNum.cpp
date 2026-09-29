@@ -1,6 +1,6 @@
 #include <cctype>
 
-int GetNum(char * str){
+int GetNum(const char * str){
     int finalvalue = 0;
     for (int i = 0; str[i] != '\0'; i++) {
         if (isdigit(str[i])) {

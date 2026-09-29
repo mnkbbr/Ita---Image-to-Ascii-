@@ -10,6 +10,7 @@ add_executable(Ita
     src/GetMeanValue.cpp
     src/GetNum.cpp
     src/HelpMenu.cpp
+    src/CheckFlags.cpp
 )
 
 target_include_directories(Ita PRIVATE include)
